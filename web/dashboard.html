@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browser Automation Lab</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--cp-border);
+  background: var(--cp-surface);
+}
+.header h1 { font-size: 1.25rem; font-weight: 700; }
+.header h1 span { color: var(--cp-accent); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+.btn-primary {
+  background: var(--cp-accent);
+  color: var(--cp-accent-fg);
+}
+.btn-primary:hover { background: var(--cp-accent-hover); }
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-secondary {
+  background: var(--cp-surface-soft);
+  color: var(--cp-text);
+  border: 1px solid var(--cp-border);
+}
+.btn-secondary:hover { background: var(--cp-bg); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 2rem;
+  border-bottom: 1px solid var(--cp-border);
+  background: var(--cp-surface);
+}
+.tab {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: var(--cp-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--cp-text); }
+.tab.active {
+  color: var(--cp-accent);
+  border-bottom-color: var(--cp-accent);
+}
+
+/* Main content */
+.content { padding: 1.5rem 2rem; }
+
+/* Live view */
+.live-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+@media (max-width: 1024px) { .live-grid { grid-template-columns: 1fr; } }
+
+.agent-panel {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+}
+.agent-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--cp-border);
+  background: var(--cp-surface-soft);
+}
+.agent-panel-header h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.status-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.625rem;
+}
+.status-idle { background: var(--cp-surface-soft); color: var(--cp-text-muted); }
+.status-running { background: var(--cp-accent-soft); color: var(--cp-accent); }
+.status-completed { background: rgba(22,163,74,0.1); color: var(--cp-success); }
+.status-failed { background: rgba(220,38,38,0.1); color: var(--cp-danger); }
+.status-compacting { background: rgba(245,158,11,0.1); color: var(--cp-warning); }
+
+/* Browser viewport */
+.browser-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--cp-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.browser-viewport img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.browser-viewport .placeholder {
+  color: var(--cp-text-muted);
+  font-size: 0.8rem;
+}
+.browser-url {
+  padding: 0.4rem 1rem;
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 0.7rem;
+  color: var(--cp-text-muted);
+  background: var(--cp-bg);
+  border-top: 1px solid var(--cp-border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Step log */
+.step-log {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  border-top: 1px solid var(--cp-border);
+}
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.step-item:hover { background: var(--cp-surface-soft); }
+.step-item.active { background: var(--cp-highlight); }
+.step-num {
+  font-family: Consolas, "Courier New", Courier, monospace;
+  color: var(--cp-text-muted);
+  min-width: 2rem;
+}
+.step-tool {
+  font-weight: 600;
+  color: var(--cp-accent);
+}
+.step-args {
+  color: var(--cp-text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.step-item.compaction {
+  background: var(--cp-warning);
+  background: rgba(245,158,11,0.12);
+  border: 1px dashed var(--cp-warning);
+}
+.step-item.compaction .step-tool {
+  color: var(--cp-warning);
+}
+.overviews-panel {
+  border-top: 1px solid var(--cp-border);
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+.overviews-panel h4 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cp-text-muted);
+  margin-bottom: 0.5rem;
+}
+.overview-item {
+  padding: 0.5rem;
+  margin-bottom: 0.4rem;
+  border-radius: 0.375rem;
+  background: var(--cp-surface-soft);
+  border-left: 3px solid var(--cp-accent);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+.overview-item .overview-query {
+  font-weight: 600;
+  color: var(--cp-text);
+  margin-bottom: 0.2rem;
+}
+.overview-item .overview-text {
+  color: var(--cp-text-soft);
+}
+
+/* Code tab */
+.code-section {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.code-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--cp-border);
+  background: var(--cp-surface-soft);
+}
+.code-section-header h3 { font-size: 0.9rem; font-weight: 600; }
+.code-section-header a {
+  font-size: 0.75rem;
+  color: var(--cp-link);
+  text-decoration: none;
+}
+.code-section-header a:hover { text-decoration: underline; }
+.code-section-body { padding: 1.25rem; }
+.code-section-body p {
+  font-size: 0.825rem;
+  color: var(--cp-text-soft);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+pre.code-block {
+  background: var(--cp-bg);
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--cp-text);
+  margin-bottom: 1rem;
+}
+pre.code-block code {
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+pre.code-block code.hljs {
+  background: transparent;
+  padding: 0;
+}
+.code-label {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+.code-label-lg { background: rgba(245,158,11,0.12); color: var(--cp-warning); }
+.code-label-cs { background: var(--cp-accent-soft); color: var(--cp-accent); }
+
+/* History view */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.run-card {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.run-card:hover { border-color: var(--cp-accent); }
+.run-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.run-card-header h4 { font-size: 0.85rem; font-weight: 600; }
+.run-card-meta { font-size: 0.75rem; color: var(--cp-text-muted); }
+
+/* Replay view */
+.replay-container {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.replay-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--cp-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.replay-header h3 { font-size: 0.9rem; font-weight: 600; }
+.replay-body { display: grid; grid-template-columns: 1fr 280px; }
+.replay-screenshot {
+  aspect-ratio: 16/9;
+  background: var(--cp-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.replay-screenshot img { width: 100%; height: 100%; object-fit: contain; }
+.replay-steps {
+  border-left: 1px solid var(--cp-border);
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+.replay-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--cp-border);
+}
+.replay-controls input[type="range"] { flex: 1; }
+
+.hidden { display: none; }
+.counter {
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  color: var(--cp-text-muted);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Browser <span>Automation</span> Lab</h1>
+  <div style="display:flex;gap:0.75rem;align-items:center">
+    <span class="counter" id="stepCounter">Steps: 0 / 0</span>
+    <button class="btn btn-primary" id="runBtn" onclick="startRun()"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Run Both Agents</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="live" onclick="switchTab('live')">Live View</div>
+  <div class="tab" data-tab="logs" onclick="switchTab('logs')">Logs</div>
+  <div class="tab" data-tab="history" onclick="switchTab('history')">History</div>
+  <div class="tab" data-tab="code" onclick="switchTab('code')">How It Works</div>
+</div>
+
+<div class="content">
+  <!-- Live View -->
+  <div id="liveView">
+    <div class="live-grid">
+      <!-- LangGraph Panel -->
+      <div class="agent-panel">
+        <div class="agent-panel-header">
+          <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cp-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> LangGraph + Azure OpenAI</h3>
+          <span class="status-badge status-idle" id="lgStatus">Idle</span>
+        </div>
+        <div class="browser-viewport" id="lgViewport">
+          <span class="placeholder">No browser activity</span>
+        </div>
+        <div class="browser-url" id="lgUrl">-</div>
+        <div class="step-log" id="lgLog"></div>
+        <div class="overviews-panel" id="lgOverviews"><h4>AI Overviews Collected</h4></div>
+      </div>
+      <div class="agent-panel">
+        <div class="agent-panel-header">
+          <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cp-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M12 8V4H8"/><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M12 18v4"/><path d="M12 2v4"/></svg> GitHub Copilot SDK</h3>
+          <span class="status-badge status-idle" id="csStatus">Idle</span>
+        </div>
+        <div class="browser-viewport" id="csViewport">
+          <span class="placeholder">No browser activity</span>
+        </div>
+        <div class="browser-url" id="csUrl">-</div>
+        <div class="step-log" id="csLog"></div>
+        <div class="overviews-panel" id="csOverviews"><h4>AI Overviews Collected</h4></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs View -->
+  <div id="logsView" class="hidden">
+    <div class="live-grid">
+      <div class="agent-panel">
+        <div class="agent-panel-header">
+          <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cp-accent)" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg> LangGraph Logs</h3>
+          <button class="btn btn-secondary" onclick="clearLogs('lg')" style="font-size:0.65rem;padding:0.2rem 0.5rem;">Clear</button>
+        </div>
+        <div class="log-output" id="lgLogs" style="height:500px;overflow-y:auto;padding:0.75rem;font-family:Consolas,'Courier New',monospace;font-size:0.7rem;line-height:1.6;background:var(--cp-bg);border-radius:0.625rem;border:1px solid var(--cp-border);white-space:pre-wrap;word-break:break-all;color:var(--cp-text-soft);">Waiting for agent to start...</div>
+      </div>
+      <div class="agent-panel">
+        <div class="agent-panel-header">
+          <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cp-accent)" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg> Copilot SDK Logs</h3>
+          <button class="btn btn-secondary" onclick="clearLogs('cs')" style="font-size:0.65rem;padding:0.2rem 0.5rem;">Clear</button>
+        </div>
+        <div class="log-output" id="csLogs" style="height:500px;overflow-y:auto;padding:0.75rem;font-family:Consolas,'Courier New',monospace;font-size:0.7rem;line-height:1.6;background:var(--cp-bg);border-radius:0.625rem;border:1px solid var(--cp-border);white-space:pre-wrap;word-break:break-all;color:var(--cp-text-soft);">Waiting for agent to start...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History View -->
+  <div id="historyView" class="hidden">
+    <div class="history-list" id="historyList">
+      <p style="color:var(--cp-text-muted);font-size:0.85rem;">No past runs yet. Click "Run Both Agents" to start.</p>
+    </div>
+
+    <!-- Replay panel (shown when a run is selected) -->
+    <div id="replayPanel" class="hidden" style="margin-top:1.5rem;">
+      <div class="replay-container">
+        <div class="replay-header">
+          <h3 id="replayTitle">Run Replay</h3>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-secondary" onclick="switchReplayAgent('langgraph')">LangGraph</button>
+            <button class="btn btn-secondary" onclick="switchReplayAgent('copilot-sdk')">Copilot SDK</button>
+          </div>
+        </div>
+        <div class="replay-body">
+          <div class="replay-screenshot" id="replayScreenshot">
+            <span class="placeholder">Select a step</span>
+          </div>
+          <div class="replay-steps" id="replaySteps"></div>
+        </div>
+        <div class="replay-controls">
+          <button class="btn btn-secondary" onclick="replayPrev()"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="19,3 5,12 19,21"/></svg></button>
+          <input type="range" id="replaySlider" min="0" max="0" value="0" oninput="replaySeek(this.value)">
+          <button class="btn btn-secondary" onclick="replayNext()"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></button>
+          <span class="counter" id="replayCounter">0 / 0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div id="codeView" class="hidden">
+    <div class="code-section">
+      <div class="code-section-header">
+        <h3>LangGraph: Manual Compaction</h3>
+        <a href="https://github.com/aymenfurter/browser-automation-lab/blob/main/langgraph_agent/compaction.py" target="_blank">View on GitHub</a>
+      </div>
+      <div class="code-section-body">
+        <p>
+          LangGraph gives you full control over context management. When messages exceed a threshold,
+          a <strong>compaction node</strong> summarizes older messages into a progress report and removes
+          the originals using <code>RemoveMessage</code>. This keeps the context window bounded while
+          preserving task state across 20 search iterations.
+        </p>
+        <p style="font-size:0.75rem; margin-bottom:0.75rem;">
+          <strong>Docs:</strong>
+          <a href="https://langchain-ai.github.io/langgraph/concepts/low_level/#stategraph" target="_blank" style="color:var(--cp-link)">StateGraph</a> |
+          <a href="https://langchain-ai.github.io/langgraph/concepts/low_level/#conditional-edges" target="_blank" style="color:var(--cp-link)">Conditional Edges</a> |
+          <a href="https://langchain-ai.github.io/langgraph/how-tos/memory/manage-conversation-history/" target="_blank" style="color:var(--cp-link)">Managing Conversation History</a> |
+          <a href="https://python.langchain.com/docs/how_to/tool_calling/" target="_blank" style="color:var(--cp-link)">Tool Calling</a> |
+          <a href="https://playwright.dev/python/docs/api/class-page" target="_blank" style="color:var(--cp-link)">Playwright Page API</a>
+        </p>
+        <span class="code-label code-label-lg">langgraph_agent/compaction.py</span>
+<pre class="code-block"><code class="language-python">COMPACTION_THRESHOLD = 15
+
+def should_compact(state: AgentState) -> str:
+    """Conditional edge: route to 'compact' or 'continue'."""
+    if len(state["messages"]) > COMPACTION_THRESHOLD:
+        return "compact"
+    return "continue"
+
+async def compact_messages(state: AgentState) -> dict:
+    """Summarize older messages and remove them from state."""
+    messages = state["messages"]
+    keep_recent = 8
+
+    # Find safe cut point - never split tool_calls/tool_response pairs
+    candidate_end = len(messages) - keep_recent
+    while candidate_end > 1:
+        msg = messages[candidate_end]
+        if isinstance(msg, ToolMessage):
+            candidate_end -= 1
+        elif isinstance(msg, AIMessage) and msg.tool_calls:
+            candidate_end -= 1
+        else:
+            break
+
+    old_messages = messages[1:candidate_end]
+    summary_response = await llm.ainvoke([
+        SystemMessage(content="Summarize completed searches and results...")
+    ] + old_messages)
+
+    # Remove old messages, insert summary
+    delete_ops = [RemoveMessage(id=m.id) for m in old_messages]
+    summary_msg = SystemMessage(
+        content=f"[PROGRESS SO FAR]:\n{summary_response.content}"
+    )
+    return {"messages": delete_ops + [summary_msg]}</code></pre>
+
+        <span class="code-label code-label-lg">langgraph_agent/graph.py - Graph Structure</span>
+<pre class="code-block"><code class="language-python">graph = StateGraph(AgentState)
+graph.add_node("agent", agent_node)      # LLM reasoning
+graph.add_node("tools", ToolNode(tools)) # Playwright execution
+graph.add_node("compact", compact_messages)
+
+graph.set_entry_point("agent")
+graph.add_conditional_edges("agent", should_continue, {
+    "tools": "tools",  # Agent wants to call a tool
+    "done": END,       # Agent is finished
+})
+graph.add_conditional_edges("tools", after_tools, {
+    "compact": "compact",  # Too many messages -> summarize
+    "continue": "agent",   # Under threshold -> continue
+})
+graph.add_edge("compact", "agent")  # After compaction -> back to agent</code></pre>
+      </div>
+    </div>
+
+    <div class="code-section">
+      <div class="code-section-header">
+        <h3>GitHub Copilot SDK: Automatic Compaction</h3>
+        <a href="https://github.com/aymenfurter/browser-automation-lab/blob/main/copilot_sdk_agent/agent.py" target="_blank">View on GitHub</a>
+      </div>
+      <div class="code-section-body">
+        <p>
+          The Copilot SDK handles compaction automatically via <strong>infinite sessions</strong>.
+          When the context window fills up, the SDK transparently compacts the conversation in the background.
+          You simply receive <code>SessionCompactionStart</code> / <code>SessionCompactionComplete</code> events -
+          no manual summarization logic needed.
+        </p>
+        <p style="font-size:0.75rem; margin-bottom:0.75rem;">
+          <strong>Docs:</strong>
+          <a href="https://github.com/features/copilot" target="_blank" style="color:var(--cp-link)">GitHub Copilot</a> |
+          <a href="https://docs.github.com/en/copilot/building-copilot-extensions/building-a-copilot-skill" target="_blank" style="color:var(--cp-link)">Copilot Extensions</a> |
+          <a href="https://github.com/nicolo-ribaudo/github-copilot-sdk-python" target="_blank" style="color:var(--cp-link)">Copilot SDK (Python)</a> |
+          <a href="https://docs.github.com/en/copilot/building-copilot-extensions/building-a-copilot-skill/configuring-your-copilot-agent-to-communicate-with-the-copilot-platform" target="_blank" style="color:var(--cp-link)">Agent Communication</a> |
+          <a href="https://playwright.dev/python/docs/api/class-page" target="_blank" style="color:var(--cp-link)">Playwright Page API</a>
+        </p>
+        <span class="code-label code-label-cs">copilot_sdk_agent/agent.py</span>
+<pre class="code-block"><code class="language-python">from copilot import CopilotClient, define_tool
+from copilot.session import PermissionHandler
+
+async with CopilotClient() as client:
+    async with await client.create_session(
+        model="gpt-4.1",
+        on_permission_request=PermissionHandler.approve_all,
+        tools=[navigate, click, fill_input, press_key,
+               wait_for_selector, extract_links],
+    ) as session:
+        done = asyncio.Event()
+
+        def on_event(event):
+            data = event.data
+            if isinstance(data, SessionCompactionStartData):
+                print("Compaction started (automatic)")
+            elif isinstance(data, SessionCompactionCompleteData):
+                print("Compaction complete")
+            elif isinstance(data, SessionIdleData):
+                done.set()
+
+        session.on(on_event)
+        await session.send(task_prompt)
+        await done.wait()  # SDK manages context automatically</code></pre>
+
+        <span class="code-label code-label-cs">Tool Definition (Pydantic schema)</span>
+<pre class="code-block"><code class="language-python">from copilot import define_tool
+from pydantic import BaseModel, Field
+
+class NavigateParams(BaseModel):
+    url: str = Field(description="URL to navigate to")
+
+@define_tool(description="Navigate the browser to a URL.")
+async def navigate_browser(params: NavigateParams) -> str:
+    await page.goto(params.url, wait_until="domcontentloaded")
+    title = await page.title()
+    return f"Navigated to: {title} ({page.url})"</code></pre>
+      </div>
+    </div>
+
+    <div class="code-section">
+      <div class="code-section-header">
+        <h3>Key Difference: Compaction Strategy</h3>
+        <a href="https://github.com/aymenfurter/browser-automation-lab/blob/main/README.md" target="_blank">Full README</a>
+      </div>
+      <div class="code-section-body">
+        <p>
+          Both approaches solve the same problem: browser automation generates many messages (tool calls +
+          results + screenshots context). After ~15 messages, the context window pressure becomes significant.
+        </p>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin-bottom:1rem;">
+          <thead>
+            <tr style="border-bottom:2px solid var(--cp-border);">
+              <th style="text-align:left;padding:0.5rem;">Aspect</th>
+              <th style="text-align:left;padding:0.5rem;">LangGraph (Manual)</th>
+              <th style="text-align:left;padding:0.5rem;">Copilot SDK (Automatic)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--cp-border);">
+              <td style="padding:0.5rem;font-weight:600;">When it triggers</td>
+              <td style="padding:0.5rem;">Developer-defined threshold (15 msgs)</td>
+              <td style="padding:0.5rem;">SDK decides based on token budget</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--cp-border);">
+              <td style="padding:0.5rem;font-weight:600;">What it preserves</td>
+              <td style="padding:0.5rem;">Custom summary + last 8 messages</td>
+              <td style="padding:0.5rem;">SDK-managed (opaque)</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--cp-border);">
+              <td style="padding:0.5rem;font-weight:600;">Developer control</td>
+              <td style="padding:0.5rem;">Full (custom summarization prompt)</td>
+              <td style="padding:0.5rem;">None (fully managed)</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--cp-border);">
+              <td style="padding:0.5rem;font-weight:600;">Safety constraint</td>
+              <td style="padding:0.5rem;">Must not split tool_call/response pairs</td>
+              <td style="padding:0.5rem;">Handled by SDK</td>
+            </tr>
+            <tr>
+              <td style="padding:0.5rem;font-weight:600;">Code complexity</td>
+              <td style="padding:0.5rem;">~60 lines of compaction logic</td>
+              <td style="padding:0.5rem;">Zero (built-in)</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <strong>Infrastructure:</strong> Both agents use Azure OpenAI (gpt-4.1) deployed via
+          <a href="https://github.com/aymenfurter/browser-automation-lab/blob/main/infra/main.bicep" target="_blank" style="color:var(--cp-link)">Bicep</a>.
+          The Copilot SDK authenticates via <code>gh auth</code> (local dev) while LangGraph uses
+          <code>DefaultAzureCredential</code> with RBAC.
+        </p>
+        <p style="font-size:0.75rem; margin-bottom:0.75rem;">
+          <strong>Further reading:</strong>
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/managed-identity" target="_blank" style="color:var(--cp-link)">Azure OpenAI + Managed Identity</a> |
+          <a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview" target="_blank" style="color:var(--cp-link)">Bicep Overview</a> |
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#gpt-4" target="_blank" style="color:var(--cp-link)">Azure OpenAI Models</a> |
+          <a href="https://docs.github.com/en/copilot/managing-copilot/configure-personal-settings/using-github-copilot-in-the-cli" target="_blank" style="color:var(--cp-link)">Copilot in the CLI</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// State
+let eventSource = null;
+let currentRunId = null;
+const agentSteps = { langgraph: [], 'copilot-sdk': [] };
+let replayRunId = null;
+let replayAgent = 'langgraph';
+let replaySteps = [];
+let replayIndex = 0;
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('liveView').classList.toggle('hidden', tab !== 'live');
+  document.getElementById('logsView').classList.toggle('hidden', tab !== 'logs');
+  document.getElementById('historyView').classList.toggle('hidden', tab !== 'history');
+  document.getElementById('codeView').classList.toggle('hidden', tab !== 'code');
+  if (tab === 'history') loadHistory();
+}
+
+// Start a run
+async function startRun() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Running...';
+
+  // Reset UI
+  agentSteps.langgraph = [];
+  agentSteps['copilot-sdk'] = [];
+  document.getElementById('lgLog').innerHTML = '';
+  document.getElementById('csLog').innerHTML = '';
+  document.getElementById('lgLogs').textContent = 'Agent starting...';
+  document.getElementById('csLogs').textContent = 'Agent starting...';
+  document.getElementById('lgOverviews').innerHTML = '<h4>AI Overviews Collected</h4>';
+  document.getElementById('csOverviews').innerHTML = '<h4>AI Overviews Collected</h4>';
+  document.getElementById('lgViewport').innerHTML = '<span class="placeholder">Starting...</span>';
+  document.getElementById('csViewport').innerHTML = '<span class="placeholder">Starting...</span>';
+  updateStatus('lg', 'running', 'Starting');
+  updateStatus('cs', 'running', 'Starting');
+
+  // Connect SSE
+  if (eventSource) eventSource.close();
+  eventSource = new EventSource('/api/events');
+  eventSource.onmessage = (e) => handleEvent(JSON.parse(e.data));
+  eventSource.onerror = () => { /* reconnect handled by browser */ };
+
+  // Trigger run
+  const res = await fetch('/api/run', { method: 'POST' });
+  const data = await res.json();
+  currentRunId = data.run_id;
+}
+
+function handleEvent(event) {
+  if (event.type === 'step') {
+    const prefix = event.agent === 'langgraph' ? 'lg' : 'cs';
+    agentSteps[event.agent].push(event);
+
+    // Update screenshot
+    const viewport = document.getElementById(`${prefix}Viewport`);
+    viewport.innerHTML = `<img src="${event.screenshot_url}" alt="Step ${event.step}">`;
+
+    // Update URL
+    document.getElementById(`${prefix}Url`).textContent = event.page_url || '-';
+
+    // Add to log
+    const log = document.getElementById(`${prefix}Log`);
+    const argsStr = Object.values(event.tool_args).join(', ').substring(0, 60);
+    log.innerHTML += `<div class="step-item" onclick="showStepScreenshot('${event.screenshot_url}', '${prefix}')">
+      <span class="step-num">${event.step}</span>
+      <span class="step-tool">${event.tool_name}</span>
+      <span class="step-args">${argsStr}</span>
+    </div>`;
+    log.scrollTop = log.scrollHeight;
+
+    // Detect AI overview capture
+    if (event.tool_name === 'get_page_text' && event.tool_args.selector && event.tool_args.selector.includes('ai-overview')) {
+      const overviewsEl = document.getElementById(`${prefix}Overviews`);
+      const lastFill = agentSteps[event.agent].slice().reverse().find(s => s.tool_name === 'fill_input');
+      const queryName = lastFill ? lastFill.tool_args.text || lastFill.tool_args.selector : 'Unknown Query';
+      overviewsEl.innerHTML += `<div class="overview-item">
+        <div class="overview-query">${queryName}</div>
+        <div class="overview-text">${(event.tool_result || '').substring(0, 300)}</div>
+      </div>`;
+      overviewsEl.scrollTop = overviewsEl.scrollHeight;
+    }
+
+    // Update counter
+    const total = agentSteps.langgraph.length + agentSteps['copilot-sdk'].length;
+    document.getElementById('stepCounter').textContent = 
+      `Steps: ${agentSteps.langgraph.length} / ${agentSteps['copilot-sdk'].length}`;
+
+  } else if (event.type === 'status') {
+    const prefix = event.agent === 'langgraph' ? 'lg' : 'cs';
+    updateStatus(prefix, event.status, event.message);
+
+    // Add compaction marker to the step log
+    if (event.status === 'compacting') {
+      const log = document.getElementById(`${prefix}Log`);
+      log.innerHTML += `<div class="step-item compaction">
+        <span class="step-num"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="step-tool">COMPACTION</span>
+        <span class="step-args">${event.message || 'Summarizing context...'}</span>
+      </div>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+  } else if (event.type === 'complete') {
+    const prefix = event.agent === 'langgraph' ? 'lg' : 'cs';
+    updateStatus(prefix, 'completed', `Done (${event.total_steps} steps)`);
+
+  } else if (event.type === 'run_complete') {
+    const btn = document.getElementById('runBtn');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Run Both Agents';
+    if (eventSource) { eventSource.close(); eventSource = null; }
+
+  } else if (event.type === 'log') {
+    const prefix = event.agent === 'langgraph' ? 'lg' : 'cs';
+    const logsEl = document.getElementById(`${prefix}Logs`);
+    const ts = new Date(event.timestamp * 1000).toLocaleTimeString();
+    logsEl.textContent += `\n[${ts}] ${event.message}`;
+    logsEl.scrollTop = logsEl.scrollHeight;
+  }
+}
+
+function updateStatus(prefix, status, text) {
+  const el = document.getElementById(`${prefix}Status`);
+  el.className = `status-badge status-${status}`;
+  el.textContent = text || status;
+}
+
+function showStepScreenshot(url, prefix) {
+  const viewport = document.getElementById(`${prefix}Viewport`);
+  viewport.innerHTML = `<img src="${url}" alt="Screenshot">`;
+}
+
+function clearLogs(prefix) {
+  document.getElementById(`${prefix}Logs`).textContent = '';
+}
+
+// History
+async function loadHistory() {
+  const res = await fetch('/api/runs');
+  const runs = await res.json();
+  const list = document.getElementById('historyList');
+  if (!runs.length) {
+    list.innerHTML = '<p style="color:var(--cp-text-muted);font-size:0.85rem;">No past runs yet.</p>';
+    return;
+  }
+  list.innerHTML = runs.map(run => {
+    const date = new Date(run.created_at * 1000).toLocaleString();
+    const lgSteps = run.agents?.langgraph?.steps || 0;
+    const csSteps = run.agents?.['copilot-sdk']?.steps || 0;
+    return `<div class="run-card" onclick="loadReplay('${run.run_id}')">
+      <div class="run-card-header">
+        <h4>${run.run_id}</h4>
+        <span class="status-badge status-${run.status}">${run.status}</span>
+      </div>
+      <div class="run-card-meta">${date} - LangGraph: ${lgSteps} steps | Copilot SDK: ${csSteps} steps</div>
+    </div>`;
+  }).join('');
+}
+
+// Replay
+async function loadReplay(runId) {
+  replayRunId = runId;
+  replayAgent = 'langgraph';
+  document.getElementById('replayPanel').classList.remove('hidden');
+  document.getElementById('replayTitle').textContent = `Replay: ${runId}`;
+  await loadReplaySteps();
+}
+
+async function switchReplayAgent(agent) {
+  replayAgent = agent;
+  await loadReplaySteps();
+}
+
+async function loadReplaySteps() {
+  const res = await fetch(`/api/runs/${replayRunId}/${replayAgent}/steps`);
+  replaySteps = await res.json();
+  replayIndex = 0;
+  renderReplaySteps();
+  if (replaySteps.length) replaySeek(0);
+  const slider = document.getElementById('replaySlider');
+  slider.max = Math.max(0, replaySteps.length - 1);
+  slider.value = 0;
+  document.getElementById('replayCounter').textContent = `${replaySteps.length ? 1 : 0} / ${replaySteps.length}`;
+}
+
+function renderReplaySteps() {
+  const container = document.getElementById('replaySteps');
+  container.innerHTML = replaySteps.map((step, i) => {
+    const argsStr = Object.values(step.tool_args || {}).join(', ').substring(0, 40);
+    return `<div class="step-item ${i === replayIndex ? 'active' : ''}" onclick="replaySeek(${i})">
+      <span class="step-num">${step.step}</span>
+      <span class="step-tool">${step.tool_name}</span>
+      <span class="step-args">${argsStr}</span>
+    </div>`;
+  }).join('');
+}
+
+function replaySeek(index) {
+  replayIndex = parseInt(index);
+  const step = replaySteps[replayIndex];
+  if (!step) return;
+  const screenshot = document.getElementById('replayScreenshot');
+  if (step.screenshot) {
+    const url = `/api/runs/${replayRunId}/${replayAgent}/screenshots/${step.screenshot}`;
+    screenshot.innerHTML = `<img src="${url}" alt="Step ${step.step}">`;
+  } else {
+    screenshot.innerHTML = '<span class="placeholder">No screenshot</span>';
+  }
+  document.getElementById('replaySlider').value = replayIndex;
+  document.getElementById('replayCounter').textContent = `${replayIndex + 1} / ${replaySteps.length}`;
+  renderReplaySteps();
+}
+
+function replayPrev() { if (replayIndex > 0) replaySeek(replayIndex - 1); }
+function replayNext() { if (replaySteps.length > 0 && replayIndex < replaySteps.length - 1) replaySeek(replayIndex + 1); }
+
+document.addEventListener('DOMContentLoaded', () => { hljs.highlightAll(); });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+[project]
+name = "browser-automation-lab"
+version = "0.1.0"
+description = "Dual-orchestrator browser automation: LangGraph vs GitHub Copilot SDK"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2",
+    "langchain>=0.3",
+    "langchain-openai>=0.3",
+    "playwright>=1.40",
+    "github-copilot-sdk",
+    "pydantic>=2.0",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+langgraph-agent = "langgraph_agent.run:main"
+copilot-sdk-agent = "copilot_sdk_agent.run:main"

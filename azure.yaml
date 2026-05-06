@@ -1,0 +1,6 @@
+name: browser-automation-lab
+metadata:
+  template: browser-automation-lab@0.0.1
+infra:
+  provider: bicep
+  path: ./infra
