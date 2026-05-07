@@ -2,6 +2,12 @@
 
 A comparative study of long-horizon browser automation using two distinct orchestration approaches. Both agents perform the same task — searching a target site for 20 Azure topics, capturing AI overviews and extracting presentation links — but differ fundamentally in how they manage context over extended multi-step sessions.
 
+> ⚠️ **Work in progress:** This repository is still under active development.
+>
+> **Pending activity (LangChain/LangGraph track):** evaluate whether deep agents are a better fit for this type of long-horizon browser automation.
+>
+> **Planned direction (both Copilot SDK and LangGraph tracks):** replace bespoke custom tools with the standard Playwright MCP toolset for a cleaner, more elegant implementation.
+
 ## The Two Approaches
 
 | | LangGraph + Azure OpenAI | GitHub Copilot SDK |
